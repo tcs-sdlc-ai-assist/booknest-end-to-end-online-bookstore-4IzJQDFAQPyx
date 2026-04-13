@@ -1,0 +1,683 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — BookNest{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p class="mt-1 text-sm text-gray-500">Manage your bookstore inventory, orders, and catalog.</p>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Books -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
+                    <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Books</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ total_books }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Orders -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-green-100 rounded-md p-3">
+                    <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Orders</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ total_orders }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-yellow-100 rounded-md p-3">
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+                    <p class="text-2xl font-semibold text-gray-900">${{ "%.2f"|format(total_revenue) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-red-100 rounded-md p-3">
+                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Low Stock</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ low_stock_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabbed Interface -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <!-- Tab Navigation -->
+        <div class="border-b border-gray-200" data-tabs="admin-tabs">
+            <nav class="flex -mb-px overflow-x-auto" aria-label="Tabs">
+                <button type="button" data-tab-target="tab-books" class="whitespace-nowrap px-6 py-3 border-b-2 font-medium text-sm border-indigo-500 text-indigo-600 bg-indigo-50" aria-selected="true">
+                    Books
+                </button>
+                <button type="button" data-tab-target="tab-authors" class="whitespace-nowrap px-6 py-3 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" aria-selected="false">
+                    Authors
+                </button>
+                <button type="button" data-tab-target="tab-genres" class="whitespace-nowrap px-6 py-3 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" aria-selected="false">
+                    Genres
+                </button>
+                <button type="button" data-tab-target="tab-orders" class="whitespace-nowrap px-6 py-3 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" aria-selected="false">
+                    Orders
+                </button>
+            </nav>
+        </div>
+
+        <!-- Books Tab -->
+        <div id="tab-books" data-tab-panel="admin-tabs" class="p-6">
+            <!-- Books Search & Add -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <form method="GET" action="/admin" class="flex items-center gap-2 w-full sm:w-auto">
+                    <input type="hidden" name="tab" value="books">
+                    <div class="relative flex-1 sm:flex-initial">
+                        <input type="text" name="book_search" value="{{ book_search if book_search is defined else '' }}" placeholder="Search books..." class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <select name="genre_filter" class="border border-gray-300 rounded-md text-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Genres</option>
+                        {% for genre in genres %}
+                        <option value="{{ genre.id }}" {% if genre_filter is defined and genre_filter|string == genre.id|string %}selected{% endif %}>{{ genre.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
+                        Filter
+                    </button>
+                </form>
+                <button type="button" onclick="document.getElementById('add-book-form').classList.toggle('hidden')" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                    <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Book
+                </button>
+            </div>
+
+            <!-- Add Book Inline Form -->
+            <div id="add-book-form" class="hidden mb-6 bg-gray-50 rounded-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Add New Book</h3>
+                <form method="POST" action="/admin/books/add" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label for="add-book-title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <input type="text" id="add-book-title" name="title" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="add-book-author" class="block text-sm font-medium text-gray-700 mb-1">Author *</label>
+                        <select id="add-book-author" name="author_id" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Select Author</option>
+                            {% for author in authors %}
+                            <option value="{{ author.id }}">{{ author.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="add-book-genre" class="block text-sm font-medium text-gray-700 mb-1">Genre *</label>
+                        <select id="add-book-genre" name="genre_id" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Select Genre</option>
+                            {% for genre in genres %}
+                            <option value="{{ genre.id }}">{{ genre.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="add-book-isbn" class="block text-sm font-medium text-gray-700 mb-1">ISBN *</label>
+                        <input type="text" id="add-book-isbn" name="isbn" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="add-book-price" class="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+                        <input type="number" id="add-book-price" name="price" step="0.01" min="0" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="add-book-stock" class="block text-sm font-medium text-gray-700 mb-1">Stock *</label>
+                        <input type="number" id="add-book-stock" name="stock" min="0" value="0" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="add-book-year" class="block text-sm font-medium text-gray-700 mb-1">Publication Year</label>
+                        <input type="number" id="add-book-year" name="publication_year" min="1000" max="2099" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="add-book-pages" class="block text-sm font-medium text-gray-700 mb-1">Pages</label>
+                        <input type="number" id="add-book-pages" name="pages" min="1" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label for="add-book-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="add-book-description" name="description" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-3">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                            Save Book
+                        </button>
+                        <button type="button" onclick="document.getElementById('add-book-form').classList.add('hidden')" class="inline-flex items-center px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-md border border-gray-300 hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Books Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Genre</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% if books and books|length > 0 %}
+                        {% for book in books %}
+                        <tr class="hover:bg-gray-50 transition-colors" id="book-row-{{ book.id }}">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ book.id }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <a href="/books/{{ book.id }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">{{ book.title }}</a>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{{ book.author }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">{{ book.genre }}</span>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${{ "%.2f"|format(book.price) }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                {% if book.stock <= 5 %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{{ book.stock }}</span>
+                                {% elif book.stock <= 20 %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">{{ book.stock }}</span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ book.stock }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                {% if book.average_rating %}
+                                <div class="flex items-center">
+                                    <svg class="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    {{ "%.1f"|format(book.average_rating) }}
+                                </div>
+                                {% else %}
+                                <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" onclick="toggleEditBook({{ book.id }})" class="text-indigo-600 hover:text-indigo-800 transition-colors" title="Edit">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <form method="POST" action="/admin/books/{{ book.id }}/delete" data-confirm-submit="Are you sure you want to delete '{{ book.title }}'? This action cannot be undone." class="inline">
+                                        <button type="submit" class="text-red-600 hover:text-red-800 transition-colors" title="Delete">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Edit Book Inline Row -->
+                        <tr id="edit-book-{{ book.id }}" class="hidden bg-indigo-50">
+                            <td colspan="8" class="px-4 py-4">
+                                <form method="POST" action="/admin/books/{{ book.id }}/edit" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Title</label>
+                                        <input type="text" name="title" value="{{ book.title }}" required class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Author</label>
+                                        <select name="author_id" required class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            {% for author in authors %}
+                                            <option value="{{ author.id }}" {% if book.author == author.name %}selected{% endif %}>{{ author.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Genre</label>
+                                        <select name="genre_id" required class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            {% for genre in genres %}
+                                            <option value="{{ genre.id }}" {% if book.genre == genre.name %}selected{% endif %}>{{ genre.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">ISBN</label>
+                                        <input type="text" name="isbn" value="{{ book.isbn }}" required class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Price</label>
+                                        <input type="number" name="price" value="{{ book.price }}" step="0.01" min="0" required class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Stock</label>
+                                        <input type="number" name="stock" value="{{ book.stock }}" min="0" required class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Publication Year</label>
+                                        <input type="number" name="publication_year" value="{{ book.publication_year if book.publication_year else '' }}" min="1000" max="2099" class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Pages</label>
+                                        <input type="number" name="pages" value="{{ book.pages if book.pages else '' }}" min="1" class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div class="sm:col-span-2 lg:col-span-4">
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Description</label>
+                                        <textarea name="description" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">{{ book.description if book.description else '' }}</textarea>
+                                    </div>
+                                    <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-3">
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                                            Update Book
+                                        </button>
+                                        <button type="button" onclick="toggleEditBook({{ book.id }})" class="inline-flex items-center px-3 py-1.5 bg-white text-gray-700 text-sm font-medium rounded-md border border-gray-300 hover:bg-gray-50 transition-colors">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-500">
+                                No books found. Add your first book above.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Books Pagination -->
+            {% if books_pages is defined and books_pages > 1 %}
+            <div class="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+                <p class="text-sm text-gray-500">
+                    Page {{ books_page }} of {{ books_pages }} ({{ books_total }} total)
+                </p>
+                <div class="flex items-center gap-2">
+                    {% if books_page > 1 %}
+                    <a href="/admin?tab=books&book_search={{ book_search if book_search is defined else '' }}&genre_filter={{ genre_filter if genre_filter is defined else '' }}&books_page={{ books_page - 1 }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if books_page < books_pages %}
+                    <a href="/admin?tab=books&book_search={{ book_search if book_search is defined else '' }}&genre_filter={{ genre_filter if genre_filter is defined else '' }}&books_page={{ books_page + 1 }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Authors Tab -->
+        <div id="tab-authors" data-tab-panel="admin-tabs" class="hidden p-6">
+            <!-- Add Author -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-lg font-medium text-gray-900">Manage Authors</h2>
+                <button type="button" onclick="document.getElementById('add-author-form').classList.toggle('hidden')" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                    <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Author
+                </button>
+            </div>
+
+            <!-- Add Author Inline Form -->
+            <div id="add-author-form" class="hidden mb-6 bg-gray-50 rounded-lg border border-gray-200 p-6">
+                <h3 class="text-base font-medium text-gray-900 mb-3">Add New Author</h3>
+                <form method="POST" action="/admin/authors/add" class="flex items-end gap-3">
+                    <div class="flex-1">
+                        <label for="add-author-name" class="block text-sm font-medium text-gray-700 mb-1">Author Name *</label>
+                        <input type="text" id="add-author-name" name="name" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                        Save
+                    </button>
+                    <button type="button" onclick="document.getElementById('add-author-form').classList.add('hidden')" class="inline-flex items-center px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-md border border-gray-300 hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                </form>
+            </div>
+
+            <!-- Authors Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% if authors and authors|length > 0 %}
+                        {% for author in authors %}
+                        <tr class="hover:bg-gray-50 transition-colors" id="author-row-{{ author.id }}">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ author.id }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900" id="author-name-{{ author.id }}">{{ author.name }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" onclick="toggleEditAuthor({{ author.id }})" class="text-indigo-600 hover:text-indigo-800 transition-colors" title="Edit">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <form method="POST" action="/admin/authors/{{ author.id }}/delete" data-confirm-submit="Are you sure you want to delete author '{{ author.name }}'?" class="inline">
+                                        <button type="submit" class="text-red-600 hover:text-red-800 transition-colors" title="Delete">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Edit Author Inline Row -->
+                        <tr id="edit-author-{{ author.id }}" class="hidden bg-indigo-50">
+                            <td colspan="3" class="px-4 py-3">
+                                <form method="POST" action="/admin/authors/{{ author.id }}/edit" class="flex items-end gap-3">
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Author Name</label>
+                                        <input type="text" name="name" value="{{ author.name }}" required class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                                        Update
+                                    </button>
+                                    <button type="button" onclick="toggleEditAuthor({{ author.id }})" class="inline-flex items-center px-3 py-1.5 bg-white text-gray-700 text-sm font-medium rounded-md border border-gray-300 hover:bg-gray-50 transition-colors">
+                                        Cancel
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500">
+                                No authors found. Add your first author above.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Genres Tab -->
+        <div id="tab-genres" data-tab-panel="admin-tabs" class="hidden p-6">
+            <!-- Add Genre -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-lg font-medium text-gray-900">Manage Genres</h2>
+                <button type="button" onclick="document.getElementById('add-genre-form').classList.toggle('hidden')" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                    <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Genre
+                </button>
+            </div>
+
+            <!-- Add Genre Inline Form -->
+            <div id="add-genre-form" class="hidden mb-6 bg-gray-50 rounded-lg border border-gray-200 p-6">
+                <h3 class="text-base font-medium text-gray-900 mb-3">Add New Genre</h3>
+                <form method="POST" action="/admin/genres/add" class="flex items-end gap-3">
+                    <div class="flex-1">
+                        <label for="add-genre-name" class="block text-sm font-medium text-gray-700 mb-1">Genre Name *</label>
+                        <input type="text" id="add-genre-name" name="name" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                        Save
+                    </button>
+                    <button type="button" onclick="document.getElementById('add-genre-form').classList.add('hidden')" class="inline-flex items-center px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-md border border-gray-300 hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                </form>
+            </div>
+
+            <!-- Genres Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% if genres and genres|length > 0 %}
+                        {% for genre in genres %}
+                        <tr class="hover:bg-gray-50 transition-colors" id="genre-row-{{ genre.id }}">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ genre.id }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ genre.name }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" onclick="toggleEditGenre({{ genre.id }})" class="text-indigo-600 hover:text-indigo-800 transition-colors" title="Edit">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <form method="POST" action="/admin/genres/{{ genre.id }}/delete" data-confirm-submit="Are you sure you want to delete genre '{{ genre.name }}'?" class="inline">
+                                        <button type="submit" class="text-red-600 hover:text-red-800 transition-colors" title="Delete">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Edit Genre Inline Row -->
+                        <tr id="edit-genre-{{ genre.id }}" class="hidden bg-indigo-50">
+                            <td colspan="3" class="px-4 py-3">
+                                <form method="POST" action="/admin/genres/{{ genre.id }}/edit" class="flex items-end gap-3">
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Genre Name</label>
+                                        <input type="text" name="name" value="{{ genre.name }}" required class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                                        Update
+                                    </button>
+                                    <button type="button" onclick="toggleEditGenre({{ genre.id }})" class="inline-flex items-center px-3 py-1.5 bg-white text-gray-700 text-sm font-medium rounded-md border border-gray-300 hover:bg-gray-50 transition-colors">
+                                        Cancel
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500">
+                                No genres found. Add your first genre above.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="tab-orders" data-tab-panel="admin-tabs" class="hidden p-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-lg font-medium text-gray-900">Manage Orders</h2>
+                <form method="GET" action="/admin" class="flex items-center gap-2">
+                    <input type="hidden" name="tab" value="orders">
+                    <select name="order_status" class="border border-gray-300 rounded-md text-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Statuses</option>
+                        <option value="pending" {% if order_status is defined and order_status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="processing" {% if order_status is defined and order_status == 'processing' %}selected{% endif %}>Processing</option>
+                        <option value="shipped" {% if order_status is defined and order_status == 'shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="delivered" {% if order_status is defined and order_status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if order_status is defined and order_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
+                        Filter
+                    </button>
+                </form>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipping Address</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% if orders and orders|length > 0 %}
+                        {% for order in orders %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#{{ order.id }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{{ order.customer if order.customer is defined else 'N/A' }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${{ "%.2f"|format(order.total) }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                {% if order.status == 'pending' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                                {% elif order.status == 'processing' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Processing</span>
+                                {% elif order.status == 'shipped' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Shipped</span>
+                                {% elif order.status == 'delivered' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Delivered</span>
+                                {% elif order.status == 'cancelled' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Cancelled</span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ order.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else 'N/A' }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 max-w-xs truncate" title="{{ order.shipping_address }}">{{ order.shipping_address }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                                <form method="POST" action="/admin/orders/{{ order.id }}/status" class="flex items-center justify-end gap-2">
+                                    <select name="status" class="border border-gray-300 rounded-md text-xs py-1 px-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                        <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Processing</option>
+                                        <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                        <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                        <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                    </select>
+                                    <button type="submit" class="inline-flex items-center px-2.5 py-1 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                                        Update
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-500">
+                                No orders found.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Orders Pagination -->
+            {% if orders_pages is defined and orders_pages > 1 %}
+            <div class="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+                <p class="text-sm text-gray-500">
+                    Page {{ orders_page }} of {{ orders_pages }} ({{ orders_total }} total)
+                </p>
+                <div class="flex items-center gap-2">
+                    {% if orders_page > 1 %}
+                    <a href="/admin?tab=orders&order_status={{ order_status if order_status is defined else '' }}&orders_page={{ orders_page - 1 }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if orders_page < orders_pages %}
+                    <a href="/admin?tab=orders&order_status={{ order_status if order_status is defined else '' }}&orders_page={{ orders_page + 1 }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/app.js"></script>
+<script>
+    function toggleEditBook(bookId) {
+        var editRow = document.getElementById('edit-book-' + bookId);
+        if (editRow) {
+            editRow.classList.toggle('hidden');
+        }
+    }
+
+    function toggleEditAuthor(authorId) {
+        var editRow = document.getElementById('edit-author-' + authorId);
+        if (editRow) {
+            editRow.classList.toggle('hidden');
+        }
+    }
+
+    function toggleEditGenre(genreId) {
+        var editRow = document.getElementById('edit-genre-' + genreId);
+        if (editRow) {
+            editRow.classList.toggle('hidden');
+        }
+    }
+
+    // Activate the correct tab based on URL parameter
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var activeTab = params.get('tab');
+        if (activeTab) {
+            var targetId = 'tab-' + activeTab;
+            var targetBtn = document.querySelector('[data-tab-target="' + targetId + '"]');
+            if (targetBtn) {
+                targetBtn.click();
+            }
+        }
+    })();
+</script>
+{% endblock %}

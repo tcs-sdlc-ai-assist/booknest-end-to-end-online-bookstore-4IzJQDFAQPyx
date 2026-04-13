@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Books — BookNest{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Browse Books</h1>
+            <p class="mt-1 text-sm text-gray-500">
+                {% if total is defined and total %}{{ total }} book{{ 's' if total != 1 else '' }} found{% else %}Discover your next great read{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <form method="GET" action="/books" id="filter-form" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+            <!-- Search -->
+            <div class="lg:col-span-2">
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" name="search" id="search" value="{{ search if search is defined and search else '' }}" placeholder="Search by title or author..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                </div>
+            </div>
+
+            <!-- Genre Filter -->
+            <div>
+                <label for="genre" class="block text-sm font-medium text-gray-700 mb-1">Genre</label>
+                <select name="genre" id="genre" class="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <option value="">All Genres</option>
+                    {% if genres is defined and genres %}
+                    {% for g in genres %}
+                    <option value="{{ g.id }}" {% if genre is defined and genre and genre|string == g.id|string %}selected{% endif %}>{{ g.name }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Price Range -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+                <div class="flex items-center space-x-2">
+                    <input type="number" name="price_min" id="price_min" value="{{ price_min if price_min is defined and price_min else '' }}" placeholder="Min" min="0" step="0.01" class="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <span class="text-gray-400 text-sm">–</span>
+                    <input type="number" name="price_max" id="price_max" value="{{ price_max if price_max is defined and price_max else '' }}" placeholder="Max" min="0" step="0.01" class="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                </div>
+            </div>
+
+            <!-- Rating Filter -->
+            <div>
+                <label for="rating_min" class="block text-sm font-medium text-gray-700 mb-1">Min Rating</label>
+                <select name="rating_min" id="rating_min" class="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <option value="">Any Rating</option>
+                    <option value="4" {% if rating_min is defined and rating_min and rating_min|string == '4' %}selected{% endif %}>4+ Stars</option>
+                    <option value="3" {% if rating_min is defined and rating_min and rating_min|string == '3' %}selected{% endif %}>3+ Stars</option>
+                    <option value="2" {% if rating_min is defined and rating_min and rating_min|string == '2' %}selected{% endif %}>2+ Stars</option>
+                    <option value="1" {% if rating_min is defined and rating_min and rating_min|string == '1' %}selected{% endif %}>1+ Stars</option>
+                </select>
+            </div>
+
+            <!-- Sort -->
+            <div>
+                <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                <select name="sort" id="sort" class="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <option value="newest" {% if sort is defined and sort == 'newest' %}selected{% endif %}>Newest First</option>
+                    <option value="price_asc" {% if sort is defined and sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_desc" {% if sort is defined and sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="rating" {% if sort is defined and sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Filter Actions -->
+        <div class="mt-4 flex items-center justify-end space-x-3">
+            <a href="/books" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear
+            </a>
+            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition-colors shadow-sm">
+                <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Apply Filters
+            </button>
+        </div>
+    </form>
+
+    <!-- Book Grid -->
+    {% if books is defined and books and books|length > 0 %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for book in books %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+            <!-- Cover Placeholder -->
+            <a href="/books/{{ book.id }}" class="block">
+                {% set colors = ['from-indigo-500 to-purple-600', 'from-emerald-500 to-teal-600', 'from-rose-500 to-pink-600', 'from-amber-500 to-orange-600', 'from-cyan-500 to-blue-600', 'from-violet-500 to-fuchsia-600', 'from-lime-500 to-green-600', 'from-red-500 to-rose-600'] %}
+                {% set color_index = book.id % 8 %}
+                <div class="h-48 bg-gradient-to-br {{ colors[color_index] }} flex items-center justify-center relative">
+                    <span class="text-6xl font-bold text-white text-opacity-80">{{ book.title[0]|upper if book.title else 'B' }}</span>
+                    {% if book.stock is defined and book.stock == 0 %}
+                    <div class="absolute top-2 right-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Out of Stock</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </a>
+
+            <!-- Book Info -->
+            <div class="p-4 flex flex-col flex-1">
+                <div class="flex-1">
+                    <!-- Genre Badge -->
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 mb-2">{{ book.genre }}</span>
+
+                    <!-- Title -->
+                    <a href="/books/{{ book.id }}" class="block">
+                        <h3 class="text-sm font-semibold text-gray-900 hover:text-primary transition-colors line-clamp-2">{{ book.title }}</h3>
+                    </a>
+
+                    <!-- Author -->
+                    <p class="mt-1 text-sm text-gray-500">{{ book.author }}</p>
+
+                    <!-- Rating -->
+                    <div class="mt-2 flex items-center space-x-1">
+                        {% set avg = book.average_rating if book.average_rating is defined and book.average_rating else 0 %}
+                        {% for i in range(1, 6) %}
+                        {% if avg >= i %}
+                        <svg class="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        {% elif avg >= i - 0.5 %}
+                        <svg class="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <defs>
+                                <linearGradient id="half-star-{{ book.id }}-{{ i }}">
+                                    <stop offset="50%" stop-color="currentColor" />
+                                    <stop offset="50%" stop-color="#D1D5DB" />
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#half-star-{{ book.id }}-{{ i }})" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        {% else %}
+                        <svg class="h-4 w-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        {% endif %}
+                        {% endfor %}
+                        <span class="text-xs text-gray-500 ml-1">
+                            {% if avg > 0 %}{{ '%.1f'|format(avg) }}{% else %}—{% endif %}
+                            <span class="text-gray-400">({{ book.review_count if book.review_count is defined else 0 }})</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Price & Add to Cart -->
+                <div class="mt-4 flex items-center justify-between">
+                    <span class="text-lg font-bold text-gray-900">${{ '%.2f'|format(book.price) }}</span>
+
+                    {% if user %}
+                        {% if book.stock is defined and book.stock > 0 %}
+                        <form method="POST" action="/cart/add">
+                            <input type="hidden" name="book_id" value="{{ book.id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition-colors shadow-sm">
+                                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                                </svg>
+                                Add
+                            </button>
+                        </form>
+                        {% else %}
+                        <button type="button" disabled class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
+                            <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                            Sold Out
+                        </button>
+                        {% endif %}
+                    {% else %}
+                    <a href="/login" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors" title="Login to add to cart">
+                        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                        </svg>
+                        Add
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pages is defined and pages > 1 %}
+    <nav class="flex items-center justify-between border-t border-gray-200 bg-white rounded-lg shadow-sm px-4 py-3 sm:px-6" aria-label="Pagination">
+        <div class="hidden sm:block">
+            <p class="text-sm text-gray-700">
+                Showing page <span class="font-medium">{{ page }}</span> of <span class="font-medium">{{ pages }}</span>
+                <span class="text-gray-500">({{ total }} total book{{ 's' if total != 1 else '' }})</span>
+            </p>
+        </div>
+        <div class="flex flex-1 justify-between sm:justify-end space-x-2">
+            {% if page > 1 %}
+            <a href="/books?page={{ page - 1 }}{% if search %}&search={{ search }}{% endif %}{% if genre %}&genre={{ genre }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if rating_min %}&rating_min={{ rating_min }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+            </a>
+            {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-200 rounded-md cursor-not-allowed">
+                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+            </span>
+            {% endif %}
+
+            <!-- Page Numbers -->
+            <div class="hidden sm:flex items-center space-x-1">
+                {% set start_page = [1, page - 2]|max %}
+                {% set end_page = [pages, page + 2]|min %}
+
+                {% if start_page > 1 %}
+                <a href="/books?page=1{% if search %}&search={{ search }}{% endif %}{% if genre %}&genre={{ genre }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if rating_min %}&rating_min={{ rating_min }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">1</a>
+                {% if start_page > 2 %}
+                <span class="px-2 text-gray-400">…</span>
+                {% endif %}
+                {% endif %}
+
+                {% for p in range(start_page, end_page + 1) %}
+                {% if p == page %}
+                <span class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-md">{{ p }}</span>
+                {% else %}
+                <a href="/books?page={{ p }}{% if search %}&search={{ search }}{% endif %}{% if genre %}&genre={{ genre }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if rating_min %}&rating_min={{ rating_min }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">{{ p }}</a>
+                {% endif %}
+                {% endfor %}
+
+                {% if end_page < pages %}
+                {% if end_page < pages - 1 %}
+                <span class="px-2 text-gray-400">…</span>
+                {% endif %}
+                <a href="/books?page={{ pages }}{% if search %}&search={{ search }}{% endif %}{% if genre %}&genre={{ genre }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if rating_min %}&rating_min={{ rating_min }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">{{ pages }}</a>
+                {% endif %}
+            </div>
+
+            {% if page < pages %}
+            <a href="/books?page={{ page + 1 }}{% if search %}&search={{ search }}{% endif %}{% if genre %}&genre={{ genre }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if rating_min %}&rating_min={{ rating_min }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                Next
+                <svg class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+            {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-200 rounded-md cursor-not-allowed">
+                Next
+                <svg class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </span>
+            {% endif %}
+        </div>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">No books found</h3>
+        <p class="mt-2 text-sm text-gray-500">
+            {% if search is defined and search %}
+            No books match your search for "<span class="font-medium">{{ search }}</span>". Try adjusting your filters.
+            {% else %}
+            No books are available at the moment. Check back soon!
+            {% endif %}
+        </p>
+        {% if search is defined and search or genre is defined and genre or price_min is defined and price_min or price_max is defined and price_max or rating_min is defined and rating_min %}
+        <div class="mt-6">
+            <a href="/books" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition-colors shadow-sm">
+                <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear All Filters
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

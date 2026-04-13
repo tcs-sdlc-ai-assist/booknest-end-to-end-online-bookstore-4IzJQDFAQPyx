@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} — BookNest{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="/books" class="inline-flex items-center text-sm text-gray-500 hover:text-primary transition-colors">
+        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Catalog
+    </a>
+</div>
+
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
+        <!-- Book Cover Placeholder -->
+        <div class="md:col-span-1 bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center p-8 min-h-[320px]">
+            <div class="text-center">
+                <svg class="h-24 w-24 text-indigo-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <p class="text-indigo-500 font-medium text-sm">Book Cover</p>
+            </div>
+        </div>
+
+        <!-- Book Details -->
+        <div class="md:col-span-2 p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{{ book.title }}</h1>
+                    <p class="text-lg text-gray-600">by <span class="font-medium text-gray-800">{{ book.author }}</span></p>
+                </div>
+                {% if user and user.role == 'admin' %}
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <a href="/admin/books/{{ book.id }}/edit" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md hover:bg-indigo-100 transition-colors">
+                        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                    </a>
+                    <form method="POST" action="/admin/books/{{ book.id }}/delete" data-confirm-submit="Are you sure you want to delete this book? This action cannot be undone.">
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors">
+                            <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Rating Display -->
+            <div class="flex items-center mb-4">
+                <div class="flex items-center">
+                    {% for i in range(1, 6) %}
+                    {% if book.average_rating is not none and i <= (book.average_rating | round(0, 'floor') | int) %}
+                    <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    {% else %}
+                    <svg class="h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="ml-2 text-sm text-gray-600">
+                    {% if book.average_rating is not none %}
+                    {{ "%.1f" | format(book.average_rating) }} out of 5
+                    {% else %}
+                    No ratings yet
+                    {% endif %}
+                    <span class="text-gray-400 ml-1">({{ book.review_count }} {{ "review" if book.review_count == 1 else "reviews" }})</span>
+                </span>
+            </div>
+
+            <!-- Metadata -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Genre</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ book.genre }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">ISBN</dt>
+                    <dd class="mt-1 text-sm text-gray-900 font-mono">{{ book.isbn }}</dd>
+                </div>
+                {% if book.publication_year %}
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Published</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ book.publication_year }}</dd>
+                </div>
+                {% endif %}
+                {% if book.pages %}
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Pages</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ book.pages }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Availability</dt>
+                    <dd class="mt-1 text-sm">
+                        {% if book.stock > 0 %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">In Stock ({{ book.stock }})</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Out of Stock</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </div>
+
+            <!-- Price -->
+            <div class="mb-6">
+                <span class="text-3xl font-bold text-gray-900">${{ "%.2f" | format(book.price) }}</span>
+            </div>
+
+            <!-- Description -->
+            {% if book.description %}
+            <div class="mb-6">
+                <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Description</h2>
+                <p class="text-gray-700 leading-relaxed">{{ book.description }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Add to Cart -->
+            {% if user %}
+            <div class="border-t pt-6">
+                {% if book.stock > 0 %}
+                <form method="POST" action="/cart/add" class="flex items-end space-x-3">
+                    <input type="hidden" name="book_id" value="{{ book.id }}">
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <div class="flex items-center">
+                            <button type="button" onclick="var inp=document.getElementById('quantity');var v=parseInt(inp.value)||1;if(v>1){inp.value=v-1;}" class="px-3 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                                </svg>
+                            </button>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ book.stock }}" class="w-16 text-center border-gray-300 border py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                            <button type="button" onclick="var inp=document.getElementById('quantity');var v=parseInt(inp.value)||1;if(v<{{ book.stock }}){inp.value=v+1;}" class="px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark transition-colors shadow-sm">
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                        </svg>
+                        Add to Cart
+                    </button>
+                </form>
+                {% else %}
+                <p class="text-sm text-red-600 font-medium">This book is currently out of stock.</p>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="border-t pt-6">
+                <p class="text-sm text-gray-600">
+                    <a href="/login" class="text-primary hover:text-primary-dark font-medium">Sign in</a> to add this book to your cart.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Reviews Section -->
+<div class="mt-8">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-gray-900">Reviews ({{ book.review_count }})</h2>
+    </div>
+
+    <!-- Write a Review -->
+    {% if user %}
+    {% if not user_has_reviewed %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Write a Review</h3>
+        <form method="POST" action="/books/{{ book.id }}/reviews">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
+                <div class="flex items-center space-x-1" data-rating-input>
+                    <input type="hidden" name="rating" value="0">
+                    {% for i in range(1, 6) %}
+                    <button type="button" data-star-value="{{ i }}" class="text-gray-300 hover:text-yellow-400 transition-colors focus:outline-none">
+                        <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="review-text" class="block text-sm font-medium text-gray-700 mb-1">Your Review (optional)</label>
+                <textarea id="review-text" name="text" rows="4" maxlength="1000" class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Share your thoughts about this book..."></textarea>
+                <p class="mt-1 text-xs text-gray-500">Maximum 1000 characters</p>
+            </div>
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark transition-colors shadow-sm">
+                Submit Review
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <p class="text-sm text-blue-800">You have already reviewed this book. You can edit or delete your review below.</p>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+        <p class="text-sm text-gray-600">
+            <a href="/login" class="text-primary hover:text-primary-dark font-medium">Sign in</a> to write a review.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Reviews List -->
+    {% if book.reviews and book.reviews | length > 0 %}
+    <div class="space-y-4">
+        {% for review in book.reviews %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5" id="review-{{ review.id }}">
+            <div class="flex items-start justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                            <span class="text-sm font-medium text-indigo-700">{{ review.user[0] | upper }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">{{ review.user }}</p>
+                        <div class="flex items-center mt-0.5">
+                            {% for i in range(1, 6) %}
+                            {% if i <= review.rating %}
+                            <svg class="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            {% else %}
+                            <svg class="h-4 w-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            {% endif %}
+                            {% endfor %}
+                            <span class="ml-2 text-xs text-gray-500">{{ review.created_at.strftime('%b %d, %Y') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review Actions -->
+                <div class="flex items-center space-x-2">
+                    {% if user and user.username == review.user %}
+                    <button type="button" onclick="document.getElementById('edit-review-{{ review.id }}').classList.toggle('hidden');document.getElementById('review-content-{{ review.id }}').classList.toggle('hidden');" class="text-gray-400 hover:text-indigo-600 transition-colors" title="Edit review">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+                    <form method="POST" action="/books/{{ book.id }}/reviews/{{ review.id }}/delete" data-confirm-submit="Are you sure you want to delete your review?">
+                        <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors" title="Delete review">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </form>
+                    {% elif user and user.role == 'admin' %}
+                    <form method="POST" action="/books/{{ book.id }}/reviews/{{ review.id }}/delete" data-confirm-submit="Are you sure you want to delete this review?">
+                        <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors" title="Delete review (admin)">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Review Text -->
+            <div id="review-content-{{ review.id }}">
+                {% if review.text %}
+                <p class="mt-3 text-sm text-gray-700 leading-relaxed">{{ review.text }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Edit Review Form (hidden by default) -->
+            {% if user and user.username == review.user %}
+            <div id="edit-review-{{ review.id }}" class="hidden mt-4 border-t pt-4">
+                <form method="POST" action="/books/{{ book.id }}/reviews/{{ review.id }}/edit">
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                        <div class="flex items-center space-x-1" data-rating-input>
+                            <input type="hidden" name="rating" value="{{ review.rating }}">
+                            {% for i in range(1, 6) %}
+                            <button type="button" data-star-value="{{ i }}" class="{{ 'text-yellow-400' if i <= review.rating else 'text-gray-300' }} hover:text-yellow-400 transition-colors focus:outline-none">
+                                <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Review Text (optional)</label>
+                        <textarea name="text" rows="3" maxlength="1000" class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-sm focus:ring-indigo-500 focus:border-indigo-500">{{ review.text if review.text else '' }}</textarea>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-dark transition-colors shadow-sm">
+                            Update Review
+                        </button>
+                        <button type="button" onclick="document.getElementById('edit-review-{{ review.id }}').classList.add('hidden');document.getElementById('review-content-{{ review.id }}').classList.remove('hidden');" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+        <svg class="h-12 w-12 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        <p class="text-gray-500 text-sm">No reviews yet. Be the first to review this book!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/app.js"></script>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}{% if book %}Edit Book{% else %}Add New Book{% endif %} — BookNest Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+        <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+            <a href="/admin" class="hover:text-primary transition-colors">Admin</a>
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+            <a href="/admin/books" class="hover:text-primary transition-colors">Books</a>
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+            <span class="text-gray-700 font-medium">{% if book %}Edit Book{% else %}Add New Book{% endif %}</span>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900">{% if book %}Edit Book{% else %}Add New Book{% endif %}</h1>
+        {% if book %}
+        <p class="mt-1 text-sm text-gray-500">Update the details for "{{ book.title }}"</p>
+        {% else %}
+        <p class="mt-1 text-sm text-gray-500">Fill in the details below to add a new book to the catalog.</p>
+        {% endif %}
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white shadow rounded-lg">
+        <form method="POST" action="{% if book %}/admin/books/{{ book.id }}/edit{% else %}/admin/books/create{% endif %}" class="p-6 space-y-6">
+
+            <!-- Title -->
+            <div>
+                <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
+                <input type="text" id="title" name="title" required
+                       value="{{ book.title if book else '' }}"
+                       placeholder="Enter book title"
+                       class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+            </div>
+
+            <!-- Author & Genre Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Author -->
+                <div>
+                    <label for="author_id" class="block text-sm font-medium text-gray-700 mb-1">Author <span class="text-red-500">*</span></label>
+                    <select id="author_id" name="author_id" required
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+                        <option value="">Select an author</option>
+                        {% if authors is defined and authors %}
+                        {% for author in authors %}
+                        <option value="{{ author.id }}" {% if book and book.author_id == author.id %}selected{% endif %}>{{ author.name }}</option>
+                        {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+
+                <!-- Genre -->
+                <div>
+                    <label for="genre_id" class="block text-sm font-medium text-gray-700 mb-1">Genre <span class="text-red-500">*</span></label>
+                    <select id="genre_id" name="genre_id" required
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+                        <option value="">Select a genre</option>
+                        {% if genres is defined and genres %}
+                        {% for genre in genres %}
+                        <option value="{{ genre.id }}" {% if book and book.genre_id == genre.id %}selected{% endif %}>{{ genre.name }}</option>
+                        {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- ISBN -->
+            <div>
+                <label for="isbn" class="block text-sm font-medium text-gray-700 mb-1">ISBN <span class="text-red-500">*</span></label>
+                <input type="text" id="isbn" name="isbn" required
+                       value="{{ book.isbn if book else '' }}"
+                       placeholder="e.g. 978-0-13-468599-1"
+                       class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+            </div>
+
+            <!-- Price & Stock Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Price -->
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price ($) <span class="text-red-500">*</span></label>
+                    <input type="number" id="price" name="price" required
+                           step="0.01" min="0"
+                           value="{{ book.price if book else '' }}"
+                           placeholder="0.00"
+                           class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+                </div>
+
+                <!-- Stock -->
+                <div>
+                    <label for="stock" class="block text-sm font-medium text-gray-700 mb-1">Stock <span class="text-red-500">*</span></label>
+                    <input type="number" id="stock" name="stock" required
+                           step="1" min="0"
+                           value="{{ book.stock if book else '0' }}"
+                           placeholder="0"
+                           class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+                </div>
+            </div>
+
+            <!-- Publication Year & Pages Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Publication Year -->
+                <div>
+                    <label for="publication_year" class="block text-sm font-medium text-gray-700 mb-1">Publication Year</label>
+                    <input type="number" id="publication_year" name="publication_year"
+                           step="1" min="1000" max="2099"
+                           value="{{ book.publication_year if book and book.publication_year else '' }}"
+                           placeholder="e.g. 2024"
+                           class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+                </div>
+
+                <!-- Pages -->
+                <div>
+                    <label for="pages" class="block text-sm font-medium text-gray-700 mb-1">Pages</label>
+                    <input type="number" id="pages" name="pages"
+                           step="1" min="1"
+                           value="{{ book.pages if book and book.pages else '' }}"
+                           placeholder="e.g. 320"
+                           class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea id="description" name="description" rows="5"
+                          placeholder="Enter a brief description of the book..."
+                          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors resize-y">{{ book.description if book and book.description else '' }}</textarea>
+                <p class="mt-1 text-xs text-gray-400">Optional. A short summary or synopsis of the book.</p>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t">
+                <a href="/admin/books"
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                    {% if book %}
+                    <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Update Book
+                    {% else %}
+                    <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create Book
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
